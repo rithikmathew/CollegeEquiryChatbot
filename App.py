@@ -1,7 +1,6 @@
 from flask import Flask, render_template, flash, request, session
 from flask import render_template, redirect, url_for, request
 import mysql.connector
-mysql.connector.connect()
 import smtplib
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
@@ -48,7 +47,7 @@ def ask():
 
         elif message == ("bye") or message == ("exit"):
 
-            bot_response = 'Hope to see you soon' + '<a href="/">Exit</a>'
+            bot_response = 'Hope to see you soon' + '<a href="http://127.0.0.1:5000">Exit</a>'
 
             print(bot_response)
             return jsonify({'status': 'OK', 'answer': bot_response})
@@ -124,77 +123,39 @@ def NewQuery1():
 def adminlogin():
     error = None
     if request.method == 'POST':
-        username = request.form['uname']
-        password = request.form['password']
+        if request.form['uname'] == 'admin' or request.form['password'] == 'admin':
+            conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+            cursor = conn.cursor()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM register")
+            data = cur.fetchall()
+            return render_template('AdminHome.html', data=data)
 
-        # Use 'and' to ensure both username and password match
-        if username == 'admin' and password == 'admin':
-            try:
-                conn = mysql.connector.connect(
-                    host="sql100.infinityfree.com",
-                    user="if0_39648553",
-                    password="Rithik002",
-                    database="if0_39648553_2chatbotdb",
-                    port=3306
-                )
-                cur = conn.cursor()
-                cur.execute("SELECT * FROM register")
-                data = cur.fetchall()
-                conn.close()
-                return render_template('AdminHome.html', data=data)
-            except mysql.connector.Error as err:
-                error = f"Database error: {err}"
-                return render_template('index.html', error=error)
         else:
-            error = "Invalid admin credentials."
             return render_template('index.html', error=error)
-    else:
-        return render_template('AdminLogin.html')  # For GET request
-
 
 
 @app.route("/reg", methods=['GET', 'POST'])
 def reg():
     if request.method == 'POST':
-        rollno = request.form.get('rollno')
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('PhoneNo')
-        department = request.form.get('department')
-        section = request.form.get('section')
-        uname = request.form.get('uname')
-        password = request.form.get('psw')
+        rollno = request.form['rollno']
+        n = request.form['name']
 
-        try:
-            conn = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cursor = conn.cursor()
+        email = request.form['email']
+        p = request.form['PhoneNo']
+        department = request.form['department']
+        section = request.form['section']
 
-            query = """
-                INSERT INTO register 
-                (rollno, name, email, phone, department, section, uname, psw) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (rollno, name, email, phone, department, section, uname, password)
-
-            cursor.execute(query, values)
-            conn.commit()
-            return render_template('UserLogin.html')
-
-        except mysql.connector.Error as err:
-            print(f"Database Error: {err}")
-            return "Registration failed. Please try again later."
-
-        finally:
-            if conn.is_connected():
-                cursor.close()
-                conn.close()
-
+        uname = request.form['uname']
+        password = request.form['psw']
+        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO register VALUES ('','" + rollno + "','" + n + "','" + email + "','" + p + "','" + department + "','" + section + "','" + uname + "','" + password + "')")
+        conn.commit()
+        conn.close()
+        # return 'file register successfully'
+        return render_template('UserLogin.html')
 
 
 
@@ -204,249 +165,127 @@ def userlogin():
     if request.method == 'POST':
         username = request.form['uname']
         password = request.form['password']
+        session['uname'] = request.form['uname']
 
-        conn = mysql.connector.connect(
-            host="sql100.infinityfree.com",
-            user="if0_39648553",
-            password="Rithik002",
-            database="if0_39648553_2chatbotdb",
-            port=3306
-        )
-        cursor = conn.cursor(dictionary=True)
-
-        # Use parameterized query to prevent SQL injection
-        cursor.execute("SELECT * FROM register WHERE uname = %s AND psw = %s", (username, password))
-        user = cursor.fetchone()
-        conn.close()
-
-        if user is None:
-            error = "Username or Password is incorrect"
-            return render_template('UserLogin.html', error=error)
+        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * from register where uname='" + username + "' and psw='" + password + "'")
+        data = cursor.fetchone()
+        if data is None:
+            return render_template('index.html')
+            return 'Username or Password is wrong'
         else:
-            # Save user info in session
-            session['uname'] = user['uname']
-            session['uid'] = user['id']  # assuming 'id' is the primary key column
+            print(data[0])
+            session['uid'] = data[0]
+            conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+            # cursor = conn.cursor()
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM register where uname='" + username + "' and psw='" + password + "'")
+            data = cur.fetchall()
 
-            return render_template('UserHome.html', data=[user])
-
+            return render_template('UserHome.html', data=data)
 
 
 @app.route("/newquery", methods=['GET', 'POST'])
 def newquery():
     if request.method == 'POST':
-        uname = session.get('uname')
-        query_type = request.form['Qtype']
-        query_text = request.form['query']
+        uname = session['uname']
+        type = request.form['Qtype']
+
+        query = request.form['query']
         date = request.form['date']
 
-        # Connect to production DB (InfinityFree)
-        try:
-            conn = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cursor = conn.cursor()
-
-            # Parameterized insert query
-            insert_query = """
-                INSERT INTO Querytb (UserName, Qtype, query, date, Answer, status)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-            cursor.execute(insert_query, (uname, query_type, query_text, date, '', 'waiting'))
-            conn.commit()
-            cursor.close()
-            conn.close()
-        except mysql.connector.Error as e:
-            print("Database error:", e)
-            return "Error submitting query", 500
-
-        # Fetch user queries with status='waiting'
-        try:
-            conn2 = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cur = conn2.cursor()
-            cur.execute("SELECT * FROM Querytb WHERE UserName = %s AND status = %s", (uname, 'waiting'))
-            data = cur.fetchall()
-            cur.close()
-            conn2.close()
-        except mysql.connector.Error as e:
-            print("Database error:", e)
-            return "Error fetching query data", 500
-
+        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO Querytb VALUES ('','" + uname + "','" + type + "','" + query + "','" + date + "','','waiting')")
+        conn.commit()
+        conn.close()
+        # return 'file register successfully'
+        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        # cursor = conn.cursor()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='waiting '")
+        data = cur.fetchall()
         return render_template('UserQueryInfo.html', data=data)
-
 
 
 @app.route("/UQueryandAns")
 def UQueryandAns():
-    uname = session.get('uname')
+    uname = session['uname']
 
-    if not uname:
-        return redirect(url_for('UserLogin'))  # Redirect to login if session expired
+    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    # cursor = conn.cursor()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='waiting'")
+    data = cur.fetchall()
 
-    try:
-        conn = mysql.connector.connect(
-            host="sql100.infinityfree.com",
-            user="if0_39648553",
-            password="Rithik002",
-            database="if0_39648553_2chatbotdb",
-            port=3306
-        )
-        cur = conn.cursor()
+    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    # cursor = conn.cursor()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='Answer'")
+    data1 = cur.fetchall()
 
-        # Fetch waiting queries
-        cur.execute("SELECT * FROM Querytb WHERE UserName = %s AND status = %s", (uname, 'waiting'))
-        waiting_queries = cur.fetchall()
-
-        # Fetch answered queries
-        cur.execute("SELECT * FROM Querytb WHERE UserName = %s AND status = %s", (uname, 'Answer'))
-        answered_queries = cur.fetchall()
-
-        return render_template('UserQueryAnswerinfo.html', wait=waiting_queries, answ=answered_queries)
-
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
-        return "An error occurred while fetching your queries. Please try again later."
-
-    finally:
-        if conn.is_connected():
-            cur.close()
-            conn.close()
-
+    return render_template('UserQueryAnswerinfo.html', wait=data, answ=data1)
 
 
 @app.route("/AdminQinfo")
 def AdminQinfo():
-    try:
-        # Establish a database connection
-        conn = mysql.connector.connect(
-            host="sql100.infinityfree.com",
-            user="if0_39648553",
-            password="Rithik002",
-            database="if0_39648553_2chatbotdb",
-            port=3306
-        )
+    # uname = session['uname']
 
-        # Use a cursor to execute the query
-        cursor = conn.cursor(dictionary=True)  # Use dictionary=True for better readability in Jinja templates
-        cursor.execute("SELECT * FROM Querytb WHERE status = %s", ('waiting',))
-        data = cursor.fetchall()
+    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    # cursor = conn.cursor()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Querytb where  status='waiting'")
+    data = cur.fetchall()
 
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
-        data = []  # Return empty data in case of failure
-
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-    # Render the template with the data
     return render_template('AdminQueryInfo.html', data=data)
-
 
 
 @app.route("/answer", methods=['GET', 'POST'])
 def answer():
     if request.method == 'POST':
-        answer_text = request.form['AAnswer']
-        query_id = request.form['id']
+        Answer = request.form['AAnswer']
+        id = request.form['id']
         uname = request.form['uname']
 
-        print(f"Answer: {answer_text}")
-        print(f"Query ID: {query_id}")
+        print(Answer)
+        print(id)
 
-        # --- Update the query with the answer ---
-        try:
-            conn = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cursor = conn.cursor()
-            update_query = "UPDATE Querytb SET status = %s, Answer = %s WHERE id = %s"
-            cursor.execute(update_query, ('Answer', answer_text, query_id))
-            conn.commit()
-            cursor.close()
-            conn.close()
-        except Exception as e:
-            print(f"Error updating query answer: {e}")
-            return "Error occurred while updating the answer", 500
+        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        cursor = conn.cursor()
+        cursor.execute(
+            "update Querytb set status='Answer',Answer='" + Answer + "' where id='" + str(id) + "' ")
+        conn.commit()
+        conn.close()
 
-        # --- Get user's phone number ---
-        try:
-            conn = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cur = conn.cursor()
-            cur.execute("SELECT PhoneNo FROM register WHERE uname = %s", (uname,))
-            data = cur.fetchone()
-            if data:
-                phnumber = data[0]
-                print(f"Sending SMS to: {phnumber}")
-                sendmsg(phnumber, "Your Query Answer updated!")
-            cur.close()
-            conn.close()
-        except Exception as e:
-            print(f"Error sending SMS: {e}")
+        conn3 = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        cur3 = conn3.cursor()
+        cur3.execute("SELECT * FROM register where 	uname='" + str(uname) + "'")
+        data3 = cur3.fetchone()
+        if data3:
+            phnumber = data3[4]
+            print(phnumber)
+            sendmsg(phnumber, "Your Query Answer updated!")
 
-        # --- Get all answered queries of the user ---
-        try:
-            conn = mysql.connector.connect(
-                host="sql100.infinityfree.com",
-                user="if0_39648553",
-                password="Rithik002",
-                database="if0_39648553_2chatbotdb",
-                port=3306
-            )
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Querytb WHERE UserName = %s AND status != %s", (uname, 'waiting'))
-            data = cur.fetchall()
-            cur.close()
-            conn.close()
-            return render_template('AdminAnswer.html', data=data)
-        except Exception as e:
-            print(f"Error fetching updated queries: {e}")
-            return "Error occurred while fetching updated data", 500
-
+        # return 'file register successfully'
+        conn = mysql.connector.connec(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        # cursor = conn.cursor()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status !='waiting '")
+        data = cur.fetchall()
+        return render_template('AdminAnswer.html', data=data)
 
 
 @app.route("/AdminAinfo")
 def AdminAinfo():
-    try:
-        conn = mysql.connector.connect(
-            host="sql100.infinityfree.com",
-            user="if0_39648553",
-            password="Rithik002",
-            database="if0_39648553_2chatbotdb",
-            port=3306
-        )
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM Querytb WHERE status != %s", ('waiting',))
-        data = cur.fetchall()
-        return render_template('AdminAnswer.html', data=data)
-    except mysql.connector.Error as err:
-        print("Database error:", err)
-        return "An error occurred while fetching data."
-    finally:
-        if conn.is_connected():
-            cur.close()
-            conn.close()
+    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    # cursor = conn.cursor()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Querytb where  status !='waiting'")
+    data = cur.fetchall()
 
+    return render_template('AdminAnswer.html', data=data)
 
 
 def sendmsg(targetno, message):
