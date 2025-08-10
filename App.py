@@ -124,7 +124,7 @@ def adminlogin():
     error = None
     if request.method == 'POST':
         if request.form['uname'] == 'admin' or request.form['password'] == 'admin':
-            conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+            conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
             cursor = conn.cursor()
             cur = conn.cursor()
             cur.execute("SELECT * FROM register")
@@ -148,7 +148,7 @@ def reg():
 
         uname = request.form['uname']
         password = request.form['psw']
-        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO register VALUES ('','" + rollno + "','" + n + "','" + email + "','" + p + "','" + department + "','" + section + "','" + uname + "','" + password + "')")
@@ -167,7 +167,7 @@ def userlogin():
         password = request.form['password']
         session['uname'] = request.form['uname']
 
-        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         cursor = conn.cursor()
         cursor.execute("SELECT * from register where uname='" + username + "' and psw='" + password + "'")
         data = cursor.fetchone()
@@ -177,7 +177,7 @@ def userlogin():
         else:
             print(data[0])
             session['uid'] = data[0]
-            conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+            conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
             # cursor = conn.cursor()
             cur = conn.cursor()
             cur.execute("SELECT * FROM register where uname='" + username + "' and psw='" + password + "'")
@@ -195,14 +195,14 @@ def newquery():
         query = request.form['query']
         date = request.form['date']
 
-        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO Querytb VALUES ('','" + uname + "','" + type + "','" + query + "','" + date + "','','waiting')")
         conn.commit()
         conn.close()
         # return 'file register successfully'
-        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         # cursor = conn.cursor()
         cur = conn.cursor()
         cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='waiting '")
@@ -214,13 +214,13 @@ def newquery():
 def UQueryandAns():
     uname = session['uname']
 
-    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
     # cursor = conn.cursor()
     cur = conn.cursor()
     cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='waiting'")
     data = cur.fetchall()
 
-    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
     # cursor = conn.cursor()
     cur = conn.cursor()
     cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status='Answer'")
@@ -233,7 +233,7 @@ def UQueryandAns():
 def AdminQinfo():
     # uname = session['uname']
 
-    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
     # cursor = conn.cursor()
     cur = conn.cursor()
     cur.execute("SELECT * FROM Querytb where  status='waiting'")
@@ -252,14 +252,14 @@ def answer():
         print(Answer)
         print(id)
 
-        conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         cursor = conn.cursor()
         cursor.execute(
             "update Querytb set status='Answer',Answer='" + Answer + "' where id='" + str(id) + "' ")
         conn.commit()
         conn.close()
 
-        conn3 = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn3 = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         cur3 = conn3.cursor()
         cur3.execute("SELECT * FROM register where 	uname='" + str(uname) + "'")
         data3 = cur3.fetchone()
@@ -269,7 +269,7 @@ def answer():
             sendmsg(phnumber, "Your Query Answer updated!")
 
         # return 'file register successfully'
-        conn = mysql.connector.connec(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+        conn = mysql.connector.connec(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
         # cursor = conn.cursor()
         cur = conn.cursor()
         cur.execute("SELECT * FROM Querytb where UserName='" + uname + "' and status !='waiting '")
@@ -279,7 +279,7 @@ def answer():
 
 @app.route("/AdminAinfo")
 def AdminAinfo():
-    conn = mysql.connector.connect(user='if0_39648553', password='Rithik002', host='sql100.infinityfree.com', database='if0_39648553_2chatbotdb')
+    conn = mysql.connector.connect(user='Mathew002', password='Sqlrithik@002', host='Mathew002.mysql.pythonanywhere-services.com', database='Mathew002$2chatbotdb')
     # cursor = conn.cursor()
     cur = conn.cursor()
     cur.execute("SELECT * FROM Querytb where  status !='waiting'")
